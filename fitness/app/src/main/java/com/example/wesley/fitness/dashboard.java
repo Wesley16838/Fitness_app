@@ -116,10 +116,10 @@ public class dashboard extends AppCompatActivity
             @Override
             public void run(){
 
-                while(!isInterrupted()){
+                while(_stop == true){
 
                     try {
-                        while(_stop == true){
+
                             Thread.sleep(3000);  //1000ms = 1 sec
 
                             runOnUiThread(new Runnable() {
@@ -127,11 +127,11 @@ public class dashboard extends AppCompatActivity
                                 @Override
                                 public void run() {
                                     getMyLocation();
-                                    Log.i("test", "test1");
+//                                    Log.i("test", "test1");
 //                                textView.setText(String.valueOf(num));/////result mile
                                 }
                             });
-                        }
+
 
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -289,11 +289,18 @@ public class dashboard extends AppCompatActivity
     private void getMyLocation(){
         SharedPreferences shared = getSharedPreferences("info", Context.MODE_PRIVATE);
         String feet = shared.getString("feet","");
+
+
         if(feet != null && feet.length() > 0){
             try{
                 mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
                 double feets = Double.parseDouble(feet);
-
+                int t = (int)feets/1000;
+                if(t<1){
+                    stone = 1000;
+                }else{
+                    stone = t*1000;
+                }
                 if (mLastLocation != null) { // If google service works
                     double lat = mLastLocation.getLatitude();
                     double lng = mLastLocation.getLongitude();
@@ -301,27 +308,29 @@ public class dashboard extends AppCompatActivity
                         //first location
                         tmp_lat = lat;
                         tmp_lng = lng;
+                        Log.i("TEST123","1");
                         textView_lng.setText(
                                 String.valueOf(lng));
                         textView_lat.setText(
                                 String.valueOf(lat));
-                        if(feets >= stone){
+                        if(feets >= stone){ //Feedback on achieving milestones (multiples of 1000 feet)
                             textView_milestone.setText("Congratulation for your milestone: " + stone);
                             stone+=1000;
                         }
-                        textView.setText(String.valueOf((int)feets));
-//                        Toast.makeText(dashboard.this,
-//                                String.valueOf(mLastLocation.getLatitude()) + "\n"
-//                                        + String.valueOf(mLastLocation.getLongitude()),
-//                                Toast.LENGTH_LONG).show();
+                        textView.setText(String.valueOf((int)feets));//Display daily statistics (in text format) on the main-screen.
+                        Toast.makeText(dashboard.this,
+                                String.valueOf(tmp_lat) + "\n"
+                                        + String.valueOf(tmp_lng),
+                                Toast.LENGTH_LONG).show();
 
                     }else{
-
+                        Log.i("TEST123","2");
                         //second location or more
-                        double dis = distance(tmp_lat,tmp_lng, lat,lng);
+                        double dis = distance( tmp_lat , tmp_lng, lat, lng); //// Can change variable to test this app works or not --> 37.4219983, -122.083, 37.4219983, -122.084
+                        Log.i("TEST123",String.valueOf(dis));
                         if(dis == 0){
                             count_num++;
-                            if(count_num == 1200){
+                            if(count_num == 1200){  //Whenever the person is at office, periodic reminder to stand up and walk every 1 hour.
                                 textView_reminder.setText("Hey, please stand up and walk!!!!!!");
                                 count_num= 0;
                             }
@@ -331,7 +340,7 @@ public class dashboard extends AppCompatActivity
                         }
                         feets = feets + dis;
 
-                        textView.setText(String.valueOf((int)feets));
+                        textView.setText(String.valueOf((int)feets));//Display daily statistics (in text format) on the main-screen.
 
                         if(feets >= stone){
                             textView_milestone.setText("Contrat for your milestone " + stone);
@@ -340,10 +349,10 @@ public class dashboard extends AppCompatActivity
 
                         tmp_lat = lat;
                         tmp_lng = lng;
-//                        Toast.makeText(dashboard.this,
-//                                String.valueOf(mLastLocation.getLatitude()) + "\n"
-//                                        + String.valueOf(mLastLocation.getLongitude()),
-//                                Toast.LENGTH_LONG).show();
+                        Toast.makeText(dashboard.this,
+                                String.valueOf(mLastLocation.getLatitude()) + "\n"
+                                        + String.valueOf(mLastLocation.getLongitude()),
+                                Toast.LENGTH_LONG).show();
                         upgradedata(feets);
                     }
 

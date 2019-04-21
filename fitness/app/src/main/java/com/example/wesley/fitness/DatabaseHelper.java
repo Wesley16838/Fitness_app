@@ -19,7 +19,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     //Function for creating table
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE "+TABLE_NAME+ " (ID INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT, distance DOUBLE)");
+        db.execSQL("CREATE TABLE if not exists "+TABLE_NAME+ " (ID INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT, distance DOUBLE)");
     }
 
     @Override
@@ -33,4 +33,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor res = db.rawQuery("select * from "+ TABLE_NAME + " order by " + COL_4 + " DESC ",null);
         return res;
     }
+//    public Cursor checkUser(String username) {
+//        SQLiteDatabase db = this.getWritableDatabase();
+//        Cursor cursor = db.rawQuery("select * from "+ TABLE_NAME + " where " + COL_2 + " = "+ username,null);                     //The sort order
+//        return cursor;
+//    }
 }

@@ -2,6 +2,7 @@ package com.example.wesley.fitness;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.v7.app.AppCompatActivity;
@@ -37,14 +38,16 @@ public class Register extends AppCompatActivity {
     private EditText username, password, c_password;
     private Button btn_register, btn_login;
     private ProgressBar loading;
-
+    DatabaseHelper myDb;
     String uname;
     String pword;
     String cpword;
+    Cursor cursor;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        myDb = new DatabaseHelper(this);
         openHelper = new DatabaseHelper(this);
         loading = findViewById(R.id.loading);
         username = findViewById(R.id.username);
@@ -75,11 +78,18 @@ public class Register extends AppCompatActivity {
                 //If there isn't any error, insert data to SQlite database
 
                 db = openHelper.getWritableDatabase();
-                inserdata(uname, pword, 0);
-                Toast.makeText(getApplicationContext(), "Register successgully!", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(Register.this, login.class);
-                finish();
-                startActivity(intent);
+                cursor = db.rawQuery("select * from "+ DatabaseHelper.TABLE_NAME  + " where " + DatabaseHelper.COL_2 + " = ?",new String[]{uname});
+                if(cursor.getCount() == 0) {
+                    // show message
+                    inserdata(uname, pword, 0);
+                    Toast.makeText(getApplicationContext(), "Register successgully!", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(Register.this, login.class);
+                    finish();
+                    startActivity(intent);
+                }else{
+                    Toast.makeText(getApplicationContext(),"User exists!",Toast.LENGTH_LONG).show();
+                }
+
             }
 
         } catch (IOError e) {
@@ -103,6 +113,7 @@ public class Register extends AppCompatActivity {
         contentValues.put(DatabaseHelper.COL_2, uname);
         contentValues.put(DatabaseHelper.COL_3, pword);
         contentValues.put(DatabaseHelper.COL_4, feet);
+
         long id = db.insert(DatabaseHelper.TABLE_NAME, null, contentValues);
 
     }
